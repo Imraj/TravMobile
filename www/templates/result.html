@@ -1,0 +1,31 @@
+<ion-header-bar class="bar bar-dark">
+    <button class="button button-icon ion-navicon" menu-toggle="left"></button>
+    <h1 class="title">Results</h1>
+
+</ion-header-bar>
+<div class="bar bar-subheader item-input-inset">
+  <label class="item-input-wrapper">
+    <i class="icon ion-search"></i>
+    <input type="text" placeholder="Filter..." ng-model="query"/>
+  </label>
+</div>
+
+<ion-content class="has-subheader padding">
+  <ion-list>
+        Search Result : {{results}}
+        <ion-item ng-repeat="result in results">
+            <h2>{{result.agency}}</h2>
+            <h3>{{result.price}}</h3>
+            <h2>{{result.pickup_datetime}}
+            <p>
+              Drop Off Address : {{ result.dropoff_location}}
+            </p>
+            <p>
+              Pick Up Address : {{ result.pickup_location}}
+            </p>
+            <p>
+              <button class="button button-block button-balanced">Book Now</button>
+            </p>
+        </ion-item>
+    </ion-list>
+</ion-content>

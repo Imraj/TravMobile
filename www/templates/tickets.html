@@ -1,0 +1,26 @@
+
+
+
+<ion-view title="Tickets">
+
+<div class="bar bar-subheader item-input-inset">
+  <label class="item-input-wrapper">
+    <input type="text" placeholder="Filter Tickets..." ng-model="query" />
+  </label>
+</div>
+
+
+  <ion-content  class="padding has-subheader">
+      <ion-list class="list" >
+          <ion-item ng-repeat="ticket in tickets | filter:query">
+              <h3>Transaction Id : {{ ticket.transactionId }}</h3><br/>
+              <h3>Ticket Id : {{ticket.ticketId}}</h3><br/>
+              <h3>From : {{ ticket.from }} </h3><br/>
+              <h3>To : {{ ticket.to }} </h3><br/>
+              <h3>Travel Date : {{ ticket.travelDate }}</h3><br/>
+              <h3>Ticket Purchased On : {{ ticket.purchasedOn}} </h3><br/>
+          </ion-item>
+
+      </ion-list>
+  </ion-content>
+</ion-view>

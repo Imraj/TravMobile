@@ -1,0 +1,92 @@
+
+
+<script src="lib/ion-autocomplete/dist/ion-autocomplete.js"></script>
+<link href="lib/ion-autocomplete/dist/ion-autocomplete.css" rel="stylesheet">
+
+<!--<ion-header-bar class="bar bar-dark">
+    <button class="button button-icon ion-navicon" menu-toggle="left"></button>
+    <h1 class="title">Home</h1>
+    <button class="button button-icon ion-search" ng-click="travelSearch(travel.location,travel.destination,travel.date)"></button>
+</ion-header-bar>-->
+
+<ion-view title="Home">
+  <ion-nav-buttons side="secondary">
+        <button class="button button-icon ion-search" ng-click="travelSearch(travel.location,travel.destination,travel.date)"></button>
+  </ion-nav-buttons>
+
+
+
+  <ion-content class="padding" id="bg-a">
+
+      <form>
+         <div class="list">
+             <label class="item item-input">
+                  <input type="text" ng-model="travel.location" placeholder="From" required/>
+                  <!--<input ion-autocomplete type="text" readonly="readonly" class="ion-autocomplete" autocomplete="off" items-method="callBackMtd()"/>-->
+              </label>
+              <label class="item item-input">
+                  <input type="text" ng-model="travel.destination" placeholder="To" required/>
+              </label>
+              <label class="item item-input" ng-click="openDatePicker()">
+                  <input type="text" ng-model=" travel.date " placeholder="Date" required/>
+
+              </label>
+
+              <label class="item item-input item-select">
+                <div class="input-label">
+                    Number Of Seats
+                </div>
+                  <select ng-model="travel.seats">
+                      <option> 1 Seat</option>
+                  </select>
+              </label>
+          </div>
+      </form>
+
+      <ion-list>
+        <ion-item class="item-divider" ng-if="result.length > 0">
+          Results
+        </ion-item>
+        <ion-item ng-repeat="result in results | filter:query" class="item-text-wrap">
+            <h2>{{result.agency}}</h2>
+            <h3>N{{result.price}}</h3>
+            <h3>{{result.pickup_datetime}}</h3>
+            <p>
+              Drop Off Address : {{ result.dropoff_location}}
+            </p>
+            <p>
+              Pick Up Address : {{ result.pickup_location}}
+            </p>
+            <p>
+              <a class="button button-block button-dark" href="#/app/book/{{result.id}}">Book Now</a>
+            </p>
+        </ion-item>
+        <ion-item ng-if="results.length == 0">
+            <p>
+              <h2>No Result Found</h2>
+            </p>
+        </ion-item>
+      </ion-list>
+
+      <ion-list ng-if=" results.length == 0 ">
+        <ion-item class="item-divider" ng-if=" results.length == 0">
+          Suggested Result
+        </ion-item>
+
+        <ion-item ng-repeat="result in suggested_results | filter:query" class="item-text-wrap" ng-if="results.length == 0">
+            <h2>{{result.agency}}</h2>
+            <h3>N{{result.price}}</h3>
+            <h3>{{result.pickup_datetime}}</h3>
+            <p>
+              Drop Off Address : {{ result.dropoff_location}}
+            </p>
+            <p>
+              Pick Up Address : {{ result.pickup_location}}
+            </p>
+            <p>
+              <a class="button button-block button-dark"  href="#/app/book/{{result.id}}">Book Now</a>
+            </p>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+</ion-view>

@@ -1,0 +1,57 @@
+<ion-view class="has-subheader padding" id="bg-a" title="Payment">
+  <ion-content class="padding">
+      <ion-list>
+        <ion-item class="item item-divider">
+          <h2>User Details</h2>
+        </ion-item>
+        <ion-item>
+          <h3>
+            {{fullName}}
+          </h3>
+        </ion-item>
+        <ion-item>
+          <h3>
+            {{emailAddress}}
+          </h3>
+        </ion-item>
+        <ion-item>
+          <h3>
+            {{phoneNumber}}
+          </h3>
+        </ion-item>
+      </ion-list>
+
+
+        <ion-list class="list">
+          <label class="item item-input item-divider">
+            <h2>Select A Payment Mode</h2>
+          </label>
+          <ion-item>
+              <button class="button button-assertive button-small" id="btn-checkout" ng-click="pay($event)">Pay Now</button>
+          </ion-item>
+        </ion-list>
+
+        <ion-list>
+          <ion-item class="item item-divider">
+            <h2>Travel Details</h2>
+          </ion-item>
+          <ion-item>
+            <h3>{{result.agency}}</h3>
+          </ion-item>
+          <ion-item>
+            <h3>{{result.pickup_location}}</h3>
+          </ion-item>
+          <ion-item>
+            <h3>{{result.dropoff_location}}</h3>
+          </ion-item>
+          <ion-item>
+            <h3>N{{result.price}}</h3>
+          </ion-item>
+        </ion-list>
+
+      <form id="checkout_form" method="post" action="mmc.orgfree.com/verify.php">
+
+      </form>
+
+  </ion-content>
+</ion-view>
