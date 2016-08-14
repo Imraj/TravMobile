@@ -1,26 +1,18 @@
-
-
-
 <ion-view title="Tickets">
+  <ion-content  class="padding" id="bg-a">
+        <ion-list class="list" >
+            <ion-item ng-repeat="ticket in tickets | filter:query">
+                <div>{{ticket.agency}}</div>
+                <h3>From : {{ ticket.location }} </h3>
+                <h3>To : {{ ticket.destination }} </h3>
+                <h3>Price : N{{ticket.price}}</h3>
+                <h3>Date : {{ticket.date}}</h3>
+                <h3>Time : {{ticket.time}}</h3>
+                
+                <a href="#/app/ticket/{{ticket.token}}" class="button button-small buttton-dark">View Details</a>
+            </ion-item>
 
-<div class="bar bar-subheader item-input-inset">
-  <label class="item-input-wrapper">
-    <input type="text" placeholder="Filter Tickets..." ng-model="query" />
-  </label>
-</div>
-
-
-  <ion-content  class="padding has-subheader">
-      <ion-list class="list" >
-          <ion-item ng-repeat="ticket in tickets | filter:query">
-              <h3>Transaction Id : {{ ticket.transactionId }}</h3><br/>
-              <h3>Ticket Id : {{ticket.ticketId}}</h3><br/>
-              <h3>From : {{ ticket.from }} </h3><br/>
-              <h3>To : {{ ticket.to }} </h3><br/>
-              <h3>Travel Date : {{ ticket.travelDate }}</h3><br/>
-              <h3>Ticket Purchased On : {{ ticket.purchasedOn}} </h3><br/>
-          </ion-item>
-
-      </ion-list>
-  </ion-content>
+        </ion-list>
+    </ion-content>
 </ion-view>
+

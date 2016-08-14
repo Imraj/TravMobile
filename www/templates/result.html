@@ -1,31 +1,80 @@
-<ion-header-bar class="bar bar-dark">
-    <button class="button button-icon ion-navicon" menu-toggle="left"></button>
-    <h1 class="title">Results</h1>
+<ion-view title="Result">
+      <div class="bar bar-subheader item-input-inset">
+        <label class="item-input-wrapper">
+          <i class="icon ion-search"></i>
+          <input type="text" placeholder="Filter..." ng-model="query"/>
+        </label>
+      </div>
 
-</ion-header-bar>
-<div class="bar bar-subheader item-input-inset">
-  <label class="item-input-wrapper">
-    <i class="icon ion-search"></i>
-    <input type="text" placeholder="Filter..." ng-model="query"/>
-  </label>
-</div>
+      <ion-content class="has-subheader padding" id="bg-a">
+           <ion-list>
+             <ion-item ng-repeat="result in results | filter:query" class="">
+                <div class="row">
+                  <div class="col col-50">
+                    <h2>{{result.agency}}</h2>
+                  </div>
+                  <div class="col col-50">
+                    <h3>N{{result.price}}</h3>
+                  </div>
+                </div>
 
-<ion-content class="has-subheader padding">
-  <ion-list>
-        Search Result : {{results}}
-        <ion-item ng-repeat="result in results">
-            <h2>{{result.agency}}</h2>
-            <h3>{{result.price}}</h3>
-            <h2>{{result.pickup_datetime}}
-            <p>
-              Drop Off Address : {{ result.dropoff_location}}
-            </p>
-            <p>
-              Pick Up Address : {{ result.pickup_location}}
-            </p>
-            <p>
-              <button class="button button-block button-balanced">Book Now</button>
-            </p>
-        </ion-item>
-    </ion-list>
-</ion-content>
+                  <h3 class="row">{{result.pickup_datetime}}</h3>
+                  <p class="row">
+                    <b>Drop Off Address :</b> {{ result.dropoff_location}}
+                  </p>
+                  <p class="row">
+                    <b>Pick Up Address :</b> {{ result.pickup_location}}
+                  </p>
+                  <p class="row">
+                    <a class="button button-full button-dark" href="#/app/book/{{result.id}}">Book Now</a>
+                  </p>
+
+              </ion-item>
+              <ion-item ng-if="results.length == 0">
+                  <p>
+                    <h2>No Result Found</h2>
+                  </p>
+              </ion-item>
+             
+           </ion-list>
+           <ion-list ng-if="results.length==0">
+                <ion-item>
+                  <p>
+                    <h2>Suggested Results</h2>
+                  </p>
+                </ion-item>
+               <ion-item ng-repeat="suggested_result in suggested_results track by $index" class="">
+                    <div class="row">
+                        <div class="col col-50">
+                          <h2>{{suggested_result.agency}}</h2>
+                        </div><br/>
+                        
+                        <div class="col col-50">
+                          <h3>N{{suggested_result.price}}</h3>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                          <div class="col col-50">
+                              <h2>*From:{{suggested_result.suggested_location}}</h2>
+                          </div>
+                          <div class="col col-50">
+                              <h2>To:{{suggested_result.suggested_destination}}</h2>
+                          </div>
+                    </div>
+
+                    <h3 class="row">{{suggested_result.pickup_datetime}}</h3>
+                    <p class="row">
+                      <b>Drop Off Address</b> : {{ suggested_result.dropoff_location}}
+                    </p>
+                    <p class="row">
+                      <b>Pick Up Address :</b> {{ suggested_result.pickup_location}}
+                    </p>
+                    <p class="row">
+                      <a class="button button-full button-dark" href="#/app/book/{{suggested_result.id}}">Book Now</a>
+                     </p>
+
+              </ion-item>
+           </ion-list>
+      </ion-content>
+</ion-view>

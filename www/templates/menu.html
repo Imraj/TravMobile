@@ -17,32 +17,30 @@
     <ion-header-bar class="bar-dark">
       <h1 class="title">Menu</h1>
     </ion-header-bar>
-    <ion-content>
+    <ion-content id="">
       <ion-list>
-        <ion-item menu-close href="#" class="item-icon-left" ng-show="isAuthenticated">
+        <ion-item menu-close href="#" class="" ng-show="isAuthenticated">
            <div>{{ fullName }}</div>
+          
+        </ion-item>
+        <ion-item menu-close href="#" class="" ng-show="isAuthenticated">
+          
            <div>{{ phoneNumber }}</div>
         </ion-item>
         <ion-item menu-close href="#/app/home" class="item-icon-left" ng-show="isAuthenticated">
           <i class="icon ion-home"></i> Home
         </ion-item>
-        <ion-item menu-close href="#/app/register" class="item-icon-left" ng-hide="isAuthenticated">
-          <i class="icon ion-person-add"></i>Register
-        </ion-item>
-        <ion-item menu-close href="#/app/login" class="item-icon-left" ng-hide="isAuthenticated">
-          <i class="icon ion-log-in"></i>Login
-        </ion-item>
-        <ion-item menu-close href="" class="item-icon-left" ng-hide="isAuthenticated">
-          <i class="icon ion-unlocked"></i>Forgot Password ? Visit trav.ng/retrieve_password
-        </ion-item>
         <ion-item menu-close href="#/app/tickets" class="item-icon-left" ng-show="isAuthenticated">
           <i class="icon ion-card"></i> Tickets
         </ion-item>
-        <ion-item menu-close href="#/app/contact" class="item-icon-left" >
-          <i class="icon ion-person"></i> Contact
-        </ion-item>
         <ion-item menu-close href="#/app/profile" class="item-icon-left" ng-show="isAuthenticated">
           <i class="icon ion-edit"></i> Profile
+        </ion-item>
+         <ion-item menu-close href="#/app/help" class="item-icon-left" ng-show="isAuthenticated">
+          <i class="icon ion-help"></i> Help
+        </ion-item>
+         <ion-item menu-close href="#/app/contact" class="item-icon-left" ng-show="isAuthenticated">
+          <i class="icon ion-compose"></i> Send Feedback
         </ion-item>
         <ion-item menu-close ng-click="Logout()" class="item-icon-left" ng-show="isAuthenticated">
           <i class="icon ion-log-out"></i> Log Out

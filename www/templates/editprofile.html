@@ -1,0 +1,40 @@
+<ion-view  id="bg-a" title="Edit Profile">
+   <ion-nav-buttons side="Secondary">
+      <button class="button button-icon ion-android-done" ng-click="saveProfile()"></button>
+  </ion-nav-buttons>
+
+  <ion-content class="padding">
+      <ion-list class="list list-inset">
+        <ion-item class="item-divider">
+          User Details
+        </ion-item>
+       
+        <label class="item item-input">
+          <input type="text" ng-model="profile.fullname" placeholder="Enter your full name" 
+            />
+        </label>
+
+         <label class="item item-input">
+          <input type="text" ng-model="profile.phone" placeholder="Enter your phone number"/>
+        </label>
+
+        <label class="item item-input">
+          <input type="text" ng-model="profile.email" placeholder="Enter your email address"/>
+        </label>
+
+        <ion-item class="item-divider item-button-right" >
+          Next Of Kin Details
+          
+        </ion-item>
+
+        <label class="item item-input">
+          <input type="text" ng-model="profile.kin_name" placeholder="Enter your next of kin name"/>
+        </label>
+
+        <label class="item item-input">
+          <input type="text" ng-model="profile.kin_phone" placeholder="Enter your next of kin phone number"/>
+        </label>
+
+      </ion-list>
+  </ion-content>
+</ion-view>

@@ -1,10 +1,8 @@
-<ion-header-bar class="bar bar-dark">
-    <button class="button button-icon ion-arrow-return-left" menu-toggle="left"></button>
-    <h1 class="title">My Profile</h1>
-    <button class="button button-icon ion-search" ng-click="travelSearch(travel.location,travel.destination)"></button>
-</ion-header-bar>
+<ion-view  id="bg-a" title="Profile">
+   <ion-nav-buttons side="Secondary">
+      <button class="button button-icon ion-edit" ng-click="editProfile()"></button>
+  </ion-nav-buttons>
 
-<ion-view>
   <ion-content class="padding">
       <ion-list class="list list-inset">
         <ion-item class="item-divider">
@@ -16,25 +14,22 @@
         </ion-item>
         <ion-item class="item-button-right">
           {{phoneNumber}}
-          <button  class="button button-clear button-energized" ng-click="editPhoneNumber()">Edit</button>
+         
         </ion-item>
         <ion-item class="item-button-right">
           {{emailAddress}}
-            <button  class="button button-clear button-energized" ng-click="editEmailAddress()">Edit</button>
+            
         </ion-item>
-        <ion-item class="item-button-right" >
-          xxxxxxxxxxxxxxxxxxxxxxxxx
-          <button  class="button button-clear button-energized" ng-click="resetPassword()">Edit</button>
-        </ion-item>
+
         <ion-item class="item-divider item-button-right" >
           Next Of Kin Details
-          <button  class="button button-clear button-energized" ng-click="addNextOfKin()">Edit</button>
+          
         </ion-item>
         <ion-item>
-          Full Name : {{nextOfKinName}}
+          {{kinName}}
         </ion-item>
         <ion-item>
-          Phone Number : {{nextOfKinPhoneNumber}}
+        {{kinPhoneNumber}}
         </ion-item>
       </ion-list>
   </ion-content>

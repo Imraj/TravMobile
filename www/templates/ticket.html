@@ -1,0 +1,64 @@
+<ion-view title="Ticket" id="bg-a">
+
+  <ion-content  class="padding">
+        <ion-list class="list card">
+             <ion-item class="item-text-wrap">
+                {{ticket.agency}}
+            </ion-item>
+            <ion-item>
+                From : {{ ticket.location }}
+            </ion-item>
+
+            <ion-item>
+                To : {{ ticket.destination }} 
+            </ion-item>
+            
+            <ion-item>
+                Ticket Id : {{ticket.ticketId}}
+            </ion-item>
+
+            <ion-item>
+                N{{ticket.price}}
+            </ion-item>
+
+            <ion-item>
+                {{ticket.fullName}}
+            </ion-item>
+
+            <ion-item>
+                {{ticket.phoneNumber}}
+            </ion-item> 
+
+            <ion-item>
+                Date : {{ ticket.date }}
+            </ion-item>
+
+            <ion-item>
+                Time : {{ticket.time}}
+            </ion-item>
+
+            <ion-item class="item-text-wrap">
+                Pick Up : {{ticket.pickup_location_name}},{{ticket.pickup_location_address}}.
+            </ion-item>
+
+            <ion-item class="item-text-wrap">
+                Drop Off : {{ticket.dropoff_location_name}},{{ticket.dropoff_location_address}}.
+            </ion-item>
+
+              <ion-item>       
+                Transaction Id : {{ticket.transactionId}}
+            </ion-item>
+
+            <ion-item>
+                {{ticket.simplePayId}}
+            </ion-item>
+
+             <ion-item>
+                {{ticket.token}}
+            </ion-item>
+
+        </ion-list>
+  </ion-content>
+
+</ion-view>
+

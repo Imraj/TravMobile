@@ -1,16 +1,15 @@
-// Ionic Starter App
 
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-// 'starter.controllers' is found in controllers.js
 
-var base = "http://localhost:90/TravoAPI";
-var mbase = "http://travoapi.azurewebsites.net/";
 
-angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
+var base = "http://localhost/travoapi";
+//var base = "https://trav.com.ng/travapi";
 
-.run(function($ionicPlatform) {
+angular.module('starter', ['ionic','ionic-datepicker','templates','ngStorage','ngCordova','ion-autocomplete'])
+
+.run(function($ionicPlatform,$rootScope,$state) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -24,10 +23,27 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
       StatusBar.styleDefault();
     }
   });
+
+   if(!angular.isDefined($rootScope.isAuthenticated) && window.localStorage.isAuthenticated){
+        // User exist
+                       $rootScope.userId = window.localStorage.userId; 
+                       $rootScope.isAuthenticated = window.localStorage.isAuthenticated;
+                       $rootScope.fullName = window.localStorage.fullName;
+                       $rootScope.emailAddress = window.localStorage.emailAddress;
+                       $rootScope.phoneNumber = window.localStorage.phoneNumber;
+                       $rootScope.kinName = window.localStorage.kinName;
+                       $rootScope.kinPhoneNumber = window.localStorage.kinPhoneNumber;
+                       $rootScope.mobileToken = window.localStorage.mobileToken;
+                       
+    }else if(!angular.isDefined($rootScope.isAuthenticated) && !window.localStorage.isAuthenticated){
+        // User is not logged at all. Send him back to login page
+        $state.go("app.login");
+    }
+
 })
 
-.controller("HomeCtrl",["TravelFactory","$state","$location","$scope","$ionicLoading","$timeout","ionicDatePicker","$cordovaInAppBrowser",
-                    function(TravelFactory,$state,$location,$scope,$ionicLoading,$timeout,ionicDatePicker,$cordovaInAppBrowser){
+.controller("HomeCtrl",["TravelFactory","$state","$location","$scope","$ionicLoading","$timeout","ionicDatePicker",
+                    function(TravelFactory,$state,$location,$scope,$ionicLoading,$timeout,ionicDatePicker){
 
 
 
@@ -35,7 +51,6 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
     location : '',
     destination : '',
     date :'',
-    seats:''
   }
 
   $scope.openDatePicker = function(val){
@@ -49,115 +64,114 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
           var day = date.getDate();
 
           $scope.travel.date = year+'-'+month+'-'+day;
-
-          console.log('Return value from the datepicker popup is : ' + year+'-'+month+'-'+day);
         },
+        from:new Date(),
         inputDate: new Date(),      //Optional
         mondayFirst: true,          //Optional
-        closeOnSelect: false,       //Optional
+        closeOnSelect: true,       //Optional
         templateType: 'modal'
     };
 
       ionicDatePicker.openDatePicker(ipObj1);
     };
 
+    TravelFactory.getPlaces()
+                 .success(function(data){
+                  
+                   $scope.all_places = data;
+                 })
+                 .error(function(err,statusCode){
 
+                 });
 
   $scope.callBackMtd = function(query,isInitializing){
-    return[{"id":1,"value":"Ogbomoso"},
-          {"id":2,"value":"Port-Harcourt"},
-          {"id":3,"value":"Ikeja"},
-          {"id":4,"value":"Ibadan"},
-          {"id":5,"value":"Enugu"}]
+
+    return TravelFactory.getPlaces();
+
+   
   }
 
   $scope.travelSearch = function(location,destination,date){
      $ionicLoading.show({template:"Loading... Please wait "});
-     TravelFactory.getResult(location,destination,date)
+      $state.go("app.result",{loc:location,
+                              destination:destination,
+                              date:date
+                            });
+      }
+
+}])
+
+
+
+.controller("ResultCtrl",["$state","$scope","TravelFactory","$ionicLoading","$timeout","$ionicPopup",function($state,$scope,TravelFactory,$ionicLoading,$timeout,$ionicPopup){
+
+  $scope.travel = {
+    location : '',
+    destination : '',
+    date :'',
+  }
+
+  var loc = $state.params.loc;
+  var destination = $state.params.destination;
+  var date = $state.params.date;
+
+  $scope.loc = loc;
+  $scope.destination = destination;
+  $scope.date = date;
+
+  TravelFactory.getResult(loc,destination,date)
                   .success(function(data){
                       $ionicLoading.hide();
                       $scope.results = data;
-                      //console.log("Num Of Results : "+$scope.results.length);
-                      //$state.go('app.result');
+                      
                       console.log($scope.results);
-                      if($scope.results.length == 0)
-                      {
-                          TravelFactory.getSuggestedResult(location,destination,date)
-                                     .success(function(data){
-
-                                     })
-                                     .error(function(data){
-
-                                     });
-                       }
 
                   })
-                  .error(function(err,statusCode){
-                      $ionicLoading.show({template:"An error occured in search"});
+                  .error(function(data,header,statusCode,config){
+                      
+                      $ionicLoading.show({template:"An error occured : " + data + header + " | " + statusCode});
                       $timeout(function(){
                         $ionicLoading.hide();
                       },3000);
 
                   });
 
-        $ionicLoading.hide();
-  }
+    TravelFactory.getSuggestedResult(loc,destination,date)
+                                     .success(function(data){
+                                        $scope.suggested_results = data; 
+                                     })
+                                     .error(function(err,statusCode){
+                                        $ionicPopup.alert({title:"err",template:"s : " + err + statusCode});
+                                     });
 
+        var travelId = $state.params.aId;
+       
+        $ionicLoading.show({template:"Fetching Details... Please wait"});
+        TravelFactory.getDetails(travelId)
+                         .success(function(data){
+                            $ionicLoading.hide();
+                            $scope.result = data;
+                         })
+                         .error(function(err,statusCode){
+                           $ionicLoading.show({template:"Error fetching data"});
+                           $timeout(function(){
+                             $ionicLoading.hide();
+                           },3000);
 
-  var travelId = $state.params.aId;
-  $ionicLoading.show({template:"Fetching Details... Please wait"})
-  TravelFactory.getDetails(travelId)
-                   .success(function(data){
-                      $ionicLoading.hide();
-                      $scope.result = data;
-                   })
-                   .error(function(err,statusCode){
-                     $ionicLoading.show({template:"Error fetching data"});
-                     $timeout(function(){
-                       $ionicLoading.hide();
-                     },3000);
-
-                   });
-
-          var options = {
-            location:'yes',
-            clearcache:'yes',
-            toolbar:'yes'
-          };
-
-          $scope.openBrowser = function(){
-              $cordovaInAppBrowser.open('https://google.com',options)
-              .then(function(event){
-                alert("successfully opened : " + event);
-              })
-              .catch(function(event){
-                alert("Err : " + event);
-              });
-          }
+                         });
 
 }])
 
-.controller("PayCtrl",["TravelFactory","$state","$location","$scope","$ionicLoading","$timeout",
-                    function(TravelFactory,$state,$location,$scope,$ionicLoading,$timeout){
+.controller("PayCtrl",["TravelFactory","$state","$location","$scope","$ionicLoading","$timeout","$rootScope","$ionicPopup",
+                    function(TravelFactory,$state,$location,$scope,$ionicLoading,$timeout,$rootScope,$ionicPopup){
 
                       $scope.travelSearch = function(location,destination,date){
                          $ionicLoading.show({template:"Loading... Please wait "});
+                        
                          TravelFactory.getResult(location,destination,date)
                                       .success(function(data){
                                           $ionicLoading.hide();
                                           $scope.results = data;
-                                          console.log("Num Of Results : "+$scope.results.length);
-                                          if($scope.results.length){
-
-                                            TravelFactory.getSuggestedResult(location,destination,date)
-                                                         .success(function(data){
-
-                                                         })
-                                                         .error(function(data){
-
-                                                         });
-                                          }
-
                                       })
                                       .error(function(err,statusCode){
                                           $ionicLoading.show({template:"An error occured in search"});
@@ -171,7 +185,6 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
                       }
 
                       var travelId = $state.params.aId;
-                      //$ionicLoading.show({template:"Fetching Details... Please wait"})
                       TravelFactory.getDetails(travelId)
                                        .success(function(data){
                                           $ionicLoading.hide();
@@ -185,86 +198,68 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
 
                                        });
 
-                      var handler = SimplePay.configure({
-                                     token: processPayment, // callback function to be called after token is received
-                                     key: 'test_pu_demo', // place your api key. Demo: test_pu_*. Live: pu_*
-                                     image: 'http://' // optional: an url to an image of your choice
-                                   });
+                      $scope.cardDetails = {};
 
-                      function processPayment(token)
-                      {
-                          var location= "loc 1";//$("#ss-dd-location").html();
-                        	var destination="loc 2";//$("#ss-dd-destination").html();
-                        	var transaction_id = "1234TRID";
-                        	var email_address = "email";//$("#ss-dd-emailAddress").html();
-                        	var phone_number = "phone";//$("#ss-dd-phoneNumber").html();
-                        	var price =  "price";//$("#ss-dd-price").html();
-                        	var agency = "agency";//$("#ss-dd-agency").html();
-                        	var fullname = "fullname";//$('#ss-dd-fullname').html();
+                      var userId = $rootScope.userId;
 
-                          var form = $('#checkout_form');
-
-                          form.append(
-                             $('<input />', { name: 'token', type: 'hidden', value: token })
-                        	);
-                        	form.append(
-                        		$('<input />',{name:'location',type:'hidden',value:location})
-                          );
-
-                        	form.append(
-                        		$('<input />',{name:'destination',type:'hidden',value:destination})
-                          );
-
-                        	form.append(
-                        	 $('<input />',{name:'transaction_id',type:'hidden',value:transaction_id})
-                          );
-
-                        	form.append(
-                        	 $('<input />',{name:'email_address',type:'hidden',value:email_address})
-                        	);
-
-                        	form.append(
-                        		 $('<input />',{name:'phone_number',type:'hidden',value:phone_number})
-                        	);
-                        	form.append(
-                        		 $('<input />',{name:'price',type:'hidden',value:price})
-                        	);
-                        	form.append(
-                        		$('<input />',{name:'fullname',type:'hidden',value:fullname})
-                        	);
-                        	form.append(
-                        		$('<input />',{name:'agency',type:'hidden',value:agency})
-                        	);
-
-                          form.submit();
-                        console.log("process payment");
+                      $scope.openPaymentForm = function(){
+                        $state.go("app.payform",{userId:userId,travelplanId:travelId});
                       }
 
-                      $scope.pay = function(event){
-                          event.preventDefault();
+                      $scope.pay = function(){
+                        $ionicLoading.show({template:"Processing Payment..."});
+                         
+                        window.PaystackPlugin.getToken(
+                            function(resp) {
+                              // A valid one-timme-use token is obtained, do your thang!
+                              var token = resp["token"];
+                              var user_id = $state.params.userId;
+                              var travelplan_id = $state.params.travelplanId;
+                              var email = $rootScope.emailAddress;
+                              TravelFactory.paystack(token,travelplan_id,user_id,email)
+                                            .success(function(data){
+                                              $ionicLoading.hide();
+                                              $ionicPopup.alert({title:"Payment success " + data["message"],template:"data:"+data });
+                                              
+                                              //if(data["status"] == true){
+                                                  $state.go("app.ticket",{token:token});
+                                              //}
 
-                          handler.open(SimplePay.CHECKOUT, // type of payment
-                          {
-                            email:$scope.emailAddress,
-                            phone:$scope.phoneNumber,
-                            amount:$scope.result.price,
-                            currency:'NGN',
-                            description:$scope.result.agency + " Ticket ",
-                            country:'NG',
-                         });
-                         console.log("pay handler");
-                         return false;
-                    }
+                                            })
+                                            .error(function(err,statusCode){
+                                                $ionicLoading.hide(); 
+                                               $ionicPopup.alert({title:"Payment failure",template:"err:"+err+" | statusCode : " + statusCode})
+                                            })
+                              
+                            },
+                            function(resp) {
+                              // Something went wrong, oops - perhaps an invalid card.
+                              $ionicLoading.hide();
+                              $ionicPopup.alert({title:"paystack failure",template:'error: '+resp["error"] + " | code:"+resp["code"]});
+                            },
+                            $scope.cardDetails.cardNumber,
+                            $scope.cardDetails.expMonth,
+                            $scope.cardDetails.expYear,
+                            $scope.cardDetails.cvv);   
+                      }
 }])
 
-.controller("LoginCtrl",["$scope","$ionicLoading","TravelFactory","$timeout","$rootScope","$location","$localStorage","$state","$ionicViewService",
-                         function($scope,$ionicLoading,TravelFactory,$timeout,$rootScope,$location,$localStorage,$state,$ionicViewService){
+.controller("LoginCtrl",["$scope","$ionicLoading","TravelFactory","$timeout","$rootScope","$location","$localStorage","$state","$ionicViewService","$ionicPopup",
+                         function($scope,$ionicLoading,TravelFactory,$timeout,$rootScope,$location,$localStorage,$state,$ionicViewService,$ionicPopup){
 
   $scope.loginData ={
     fullname:'',
     emailAddress:'',
     phoneNumber:'',
     password:''
+  }
+
+  $scope.openRegisterView = function(){
+    $state.go("app.register");
+  }
+
+  $scope.showForgotPassword = function(){
+    $ionicPopup.alert({title:"Forgot Password?",template:"Visit trav.com.ng/retrieve/password Or Click <a href='https://trav.com.ng/retrieve/password'>here</a>"});
   }
 
   $scope.Login = function(phone,password){
@@ -276,34 +271,50 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
 
     TravelFactory.loginUser(phone,password)
                  .success(function(data){
-                   $ionicLoading.hide();
-                   $localStorage.isAuthenticated = true;
-                   $localStorage.fullName = data['fullName'];
-                   $localStorage.emailAddress = data['emailAddress'];
-                   $localStorage.phoneNumber = data['phoneNumber'];
-                   $localStorage.kinName = data['next_of_kin_name'];
-                   $localStorage.kinPhoneNumber = data['next_of_kin_phoneNo'];
-                   console.log("FullName is : " + $localStorage.fullName);
-                   $rootScope.isAuthenticated = $localStorage.isAuthenticated;
-                   $rootScope.fullName = $localStorage.fullName;
-                   $rootScope.emailAddress = $localStorage.emailAddress;
-                   $rootScope.phoneNumber = $localStorage.phoneNumber;
-                   $rootScope.kinName = $localStorage.kinName;
-                   $rootScope.kinPhoneNumber = $localStorage.kinPhoneNumber;
+                    $ionicLoading.hide();
+                    if(data["status"] == "failed")
+                    {
+                       $ionicLoading.show({template:"Invalid Login Details"});
+                       $timeout(function(){
+                         $ionicLoading.hide();
+                       },3000);
 
-                   //$location.path("/home");
-                   $state.go('app.home');
+                    }
+                    else{
+
+                       window.localStorage.isAuthenticated = true;
+                       window.localStorage.userId = data['id'];
+                      
+                       window.localStorage.fullName = data['fullName'];
+                       window.localStorage.emailAddress = data['emailAddress'];
+                       window.localStorage.phoneNumber = data['phoneNumber'];
+                       window.localStorage.kinName = data['next_of_kin_name'];
+                       window.localStorage.kinPhoneNumber = data['next_of_kin_phoneNo'];
+                       window.localStorage.mobileToken = data["mobileToken"];
+
+                       $rootScope.userId = window.localStorage.userId;
+                       $rootScope.isAuthenticated = window.localStorage.isAuthenticated;
+                       $rootScope.fullName = window.localStorage.fullName;
+                       $rootScope.emailAddress = window.localStorage.emailAddress;
+                       $rootScope.phoneNumber = window.localStorage.phoneNumber;
+                       $rootScope.kinName = window.localStorage.kinName;
+                       $rootScope.kinPhoneNumber = window.localStorage.kinPhoneNumber;
+                       $rootScope.mobileToken = window.localStorage.mobileToken;
+
+                       $state.go('app.home');
+
+                    }
                  })
                  .error(function(err,statusCode){
-
-                   $ionicLoading.show({template:"Error Occured Logging In.. Please try again"});
+                 
+                  $ionicLoading.show({title:"",template:"Error Occured Logging In.. Please try again : " + err + statusCode});
                    $timeout(function(){
                      $ionicLoading.hide();
-                   },3000);
+                   },5000);
                  });
   }
 
-  $scope.Logout = function()
+  $rootScope.Logout = function()
   {
     $rootScope.isAuthenticated = "";
     $rootScope.fullName = "";
@@ -317,22 +328,38 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
 
 }])
 
-.controller("RegisterCtrl",["$scope","$ionicLoading","TravelFactory","$timeout",function($scope,$ionicLoading,TravelFactory,$timeout){
+.controller("RegisterCtrl",["$scope","$ionicLoading","TravelFactory","$timeout","$state",function($scope,$ionicLoading,TravelFactory,$timeout,$state){
   $scope.loginData ={
     fullname:'',
     emailAddress:'',
     phoneNumber:'',
-    password:''
+    password:'',
+    cpassword:''
   }
 
-  $scope.Register = function($fullname,$email,$phone,$password){
+  $scope.openLoginView = function(){
+    $state.go("app.login");
+  }
+
+  $scope.Register = function($fullname,$email,$phone,$password,$cpassword){
       $ionicLoading.show({template:"Creating your account ... Please wait"});
-      TravelFactory.registerUser($fullname,$email,$phone,$password)
+      TravelFactory.registerUser($fullname,$email,$phone,$password,$cpassword)
                    .success(function(data){
                      $ionicLoading.hide();
-                     $timeout(function(){
-                       $ionicLoading.show(data["message"]);
-                     },2000);
+                     if(data["status"]){
+                         $ionicLoading.show({template:data["message"]});
+                         $timeout(function(){
+                            $ionicLoading.hide();
+                            if(data["status"] == "success")
+                            {
+                                $ionicPopup.alert({title:"Account ",template:"Account Created Successfully ! Login To Continue"})
+                                  .then(function(res){
+                                    $state.go("app.login");
+                                  });
+                            }
+                         },5000);
+                         
+                     }
                    })
                    .error(function(err,statusCode){
                        $ionicLoading.show({template:"Error Occured Creating your account.. Please try again"});
@@ -343,21 +370,101 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
   }
 }])
 
-.controller("TicketCtrl",["$scope","$ionicLoading","$ionicHistory",function($scope,$ionicLoading,$ionicHistory){
+.controller("TicketCtrl",["$scope","$ionicPopup","$timeout","$ionicLoading","$ionicHistory","TravelFactory","$rootScope","$state",function($scope,$ionicPopup,$timeout,$ionicLoading,$ionicHistory,TravelFactory,$rootScope,$state){
 
+     $ionicLoading.show();
+    var token = $state.params.token;
+   
+    TravelFactory.getTicket(token)
+                 .success(function(data){
+                    console.log("Tik data : " + data);
+                    $scope.ticket = data;
+                     $ionicLoading.hide();
+                   
+                 })
+                 .error(function(err,statusCode){
+                       $ionicLoading.hide();
+                      $ionicPopup.alert({title:"Ticket : " + token + " Error",template:"An error occured"});
+                 });
 
-
-
-  $scope.tickets = [
-    {transactionId:"##############",ticketId:"#############",from:"Ogbomoso",to:"Port-Harcourt",travelDate:"May 22,2016",purchasedOn:"May 19,2016"},
-    {transactionId:"################",ticketId:"############",from:"Ikeja",to:"Enugu",travelDate:"March 3,2016",purchasedOn:"March 2,2016"},
-    {transactionId:"################",ticketId:"############",from:"Ibadan",to:"Imo",travelDate:"March 13,2016",purchasedOn:"March 13,2016"}
-    ]
 
 
 }])
 
-.controller("ProfileCtrl",["$scope","$ionicModal",function($scope,$ionicModal){
+.controller("TicketsCtrl",["$scope","$ionicPopup","$timeout","$ionicLoading","$ionicHistory","TravelFactory","$rootScope","$state",function($scope,$ionicPopup,$timeout,$ionicLoading,$ionicHistory,TravelFactory,$rootScope,$state){
+
+    $ionicLoading.show();
+    var userId = $rootScope.userId;
+    TravelFactory.getTickets(userId)
+                 .success(function(data){
+                   
+                    $ionicLoading.hide();
+                    $scope.tickets = data;
+                    
+                 })
+                 .error(function(err,statusCode){
+                     $ionicLoading.hide();
+                    $ionicPopup.alert({title:"Tickets : Error",template:"An error occured"});
+                  
+                 });
+
+
+}])
+
+.controller("ProfileCtrl",["$scope","$state","TravelFactory","$ionicLoading","$timeout",function($scope,$state,TravelFactory,$ionicLoading,$timeout){
+
+    $scope.profile = {
+      fullname:$scope.fullName,
+      email:$scope.emailAddress,
+      phone:$scope.phoneNumber,
+      kin_name:$scope.kinName,
+      kin_phone:$scope.kinPhoneNumber
+    }
+  
+
+    $scope.editProfile = function(){
+      $state.go("app.editprofile");
+     
+    }
+
+    $scope.saveProfile = function(){
+
+      $ionicLoading.show({ template : "Updating profile" });
+      var fullname = $scope.profile.fullname;
+      var email = $scope.profile.email;
+      var phone = $scope.profile.phone;
+      var kin_name = $scope.profile.kin_name;
+      var kin_phone = $scope.profile.kin_phone;
+      var userId = $scope.userId;
+
+     
+      TravelFactory.updateProfile(fullname,email,phone,kin_name,kin_phone,userId)
+                   .success(function(data){
+                      $ionicLoading.hide();
+                      
+                       
+                      //if(data["status"] == "success"){
+                      
+                        $ionicLoading.show({template:"Profile updated successfully"});
+
+                        $timeout(function(){
+                           $ionicLoading.hide();
+                           $state.go("app.login"); 
+                        },3000);
+                       
+                      //}
+
+                   })
+                   .error(function(err,statusCode){
+                      $ionicLoading.hide();
+
+                      $ionicLoading.show({template:"Error while updating profile"});
+                       $timeout(function(){
+                         $ionicLoading.hide();
+                       },3000);
+                   });
+
+    }
 
 }])
 
@@ -373,77 +480,13 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
 
     $state.go("app.login");
 
-    //$location.path("#/app/login");
+  
   }
 
 }])
 
-.controller("ProfileCtrl",["$scope","$ionicPopup","$ionicLoading","$location","TravelFactory",function($scope,$ionicPopup,$ionicLoading,$location,TravelFactory){
 
-
-  $scope.editPhoneNumber = function()
-  {
-      $ionicPopup.prompt({
-                title:'Phone Number',
-                template:' ',
-                inputType:'text',
-                inputPlaceholder:"Enter Your New Phone Number"
-      }).then(function(res){
-            $ionicLoading.show();
-            TravelFactory.updatePhoneNumber(res)
-                .success(function(data){
-                    $ionicPopup.alert({title:'New phone number : ' + res ,template:" Phone number successfully updated "});
-                    $ionicLoading.hide();
-                })
-                .error(function(){
-                    $ionicLoading.hide();
-                    $ionicPopup.alert({title:' ',template:" An Error Occured "});
-                })
-    })
-  }
-
-  $scope.editEmailAddress = function()
-  {
-      $ionicPopup.prompt({
-              title:'Email Address',
-              template:' ',
-              inputType:'text',
-              inputPlaceholder:"Enter Your New Email Address"
-        }).then(function(res){
-          $ionicLoading.show();
-          TravelFactory.updateEmailAddress(res)
-              .success(function(data){
-                  $ionicPopup.alert({title:'New email address : ' + res ,template:" Email address successfully updated "});
-                  $ionicLoading.hide();
-              })
-              .error(function(){
-                  $ionicLoading.hide();
-                  $ionicPopup.alert({title:' ',template:" An Error Occured "});
-              })
-  })
-  }
-
-  $scope.resetPassword = function()
-  {
-    $location.path("#/app/resetpassword");
-  }
-
-  $scope.addNextOfKin = function()
-  {
-    $location.path("#/app/nextofkin");
-  }
-
-}])
-
-.controller("ResetPasswordCtrl",["$scope",function($scope){
-
-}])
-
-.controller("KinCtrl",["$scope",function($scope){
-
-}])
-
-.config(function($stateProvider, $urlRouterProvider,ionicDatePickerProvider) {
+.config(function($stateProvider, $urlRouterProvider,ionicDatePickerProvider,$httpProvider) {
 
   var datePickerObj = {
       inputDate: new Date(),
@@ -454,11 +497,11 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
       weeksList: ["S", "M", "T", "W", "T", "F", "S"],
       monthsList: ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"],
       templateType: 'modal',
-      from: new Date(2012, 8, 1),
+      from: new Date(),
       to: new Date(2018, 8, 1),
       showTodayButton: true,
       dateFormat: 'dd MMM yyyy',
-      closeOnSelect: false,
+      closeOnSelect: true,
     };
   ionicDatePickerProvider.configDatePicker(datePickerObj);
 
@@ -466,14 +509,14 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
     .state('app', {
     url: '/app',
     abstract: true,
-    templateUrl: 'templates/menu.html',
-
+    templateUrl: 'menu.html',
+    controller:"LogoutCtrl"
   })
   .state('app.home', {
       url: '/home',
       views: {
         'menuContent': {
-          templateUrl: 'templates/home.html',
+          templateUrl: 'home.html',
           controller: 'HomeCtrl'
         }
       }
@@ -483,8 +526,8 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
       url:'/book/:aId',
       views:{
         'menuContent':{
-          templateUrl: 'templates/book.html',
-          controller:'HomeCtrl'
+          templateUrl: 'book.html',
+          controller:'ResultCtrl'
         }
       }
     })
@@ -493,39 +536,38 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
       url:'/pay/:aId',
       views:{
         'menuContent':{
-          templateUrl: 'templates/pay.html',
+          templateUrl: 'pay.html',
           controller:'PayCtrl'
         }
       }
     })
 
-
-    .state('app.result', {
-        url: '/result',
-        views: {
-          'menuContent': {
-            templateUrl: 'templates/result.html',
-            controller: 'HomeCtrl'
-          }
-        }
-      })
-
-
-    .state('app.about', {
-      url: '/about',
-      views: {
-        'menuContent': {
-          templateUrl: 'templates/about.html',
-
+     .state('app.payform',{
+      url:'/payform/:userId/:travelplanId',
+      views:{
+        'menuContent':{
+          templateUrl: 'payform.html',
+          controller:'PayCtrl'
         }
       }
-    })
+    })    
 
+    .state('app.result', {
+        url: '/result/:loc/:destination/:date',
+        views: {
+          'menuContent': {
+            templateUrl: 'result.html',
+            controller: 'ResultCtrl',
+           }
+        },
+       
+      })
+    
     .state('app.login', {
       url: '/login',
       views: {
         'menuContent': {
-          templateUrl: 'templates/login.html',
+          templateUrl: 'login.html',
           controller: 'LoginCtrl'
         }
       }
@@ -535,7 +577,7 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
       url: '/register',
       views: {
         'menuContent': {
-          templateUrl: 'templates/register.html',
+          templateUrl: 'register.html',
           controller: 'RegisterCtrl'
         }
       }
@@ -545,8 +587,18 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
     url: '/contact',
     views: {
       'menuContent': {
-        templateUrl: 'templates/contact.html',
-        controller: 'ContactCtrl'
+        templateUrl: 'contact.html',
+        
+      }
+    }
+  })
+
+  .state('app.help', {
+    url: '/help',
+    views: {
+      'menuContent': {
+        templateUrl: 'help.html',
+        
       }
     }
   })
@@ -555,7 +607,17 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
     url: '/profile',
     views: {
       'menuContent': {
-        templateUrl: 'templates/profile.html',
+        templateUrl: 'profile.html',
+        controller: 'ProfileCtrl'
+      }
+    }
+  })
+
+   .state('app.editprofile', {
+    url: '/editprofile',
+    views: {
+      'menuContent': {
+        templateUrl: 'editprofile.html',
         controller: 'ProfileCtrl'
       }
     }
@@ -565,28 +627,18 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
     url:'/tickets',
     views:{
       'menuContent':{
-        templateUrl:'templates/tickets.html',
-        controller : 'TicketCtrl'
+        templateUrl:'tickets.html',
+        controller : 'TicketsCtrl'
       }
     }
   })
 
-  .state('app.resetpassword',{
-    url:'/resetpassword',
+  .state('app.ticket',{
+    url:"/ticket/:token",
     views:{
       'menuContent':{
-        templateUrl:'templates/resetpassword.html',
-        controller : 'ProfileCtrl'
-      }
-    }
-  })
-
-  .state('app.nextofkin',{
-    url:'/nextofkin',
-    views:{
-      'menuContent':{
-        templateUrl:'templates/nextofkin.html',
-        controller : 'ProfileCtrl'
+        templateUrl:"ticket.html",
+        controller:"TicketCtrl"
       }
     }
   })
@@ -596,49 +648,114 @@ angular.module('starter', ['ionic','ionic-datepicker','ngStorage','ngCordova'])
     url: '/transaction',
     views: {
       'menuContent': {
-        templateUrl: 'templates/transaction.html',
+        templateUrl: 'transaction.html',
         controller: 'TransactionCtrl'
       }
     }
+  })
+
+  .state('app.success',{
+    url: '/success',
+    views:{
+      'menuContent':{
+        templateUrl: 'transactions/success.html',
+        controller:'TicketCtrl'
+      }
+    }
+  })
+
+  .state('app.failed',{
+    url: '/failed/:transaction_id',
+    views:{
+      'menuContent':{
+        templateUrl: 'transactions/failed.html',
+        controller:''
+      }
+    }
   });
+
+
+  $httpProvider.defaults.headers.common = {};
+  $httpProvider.defaults.headers.post = {};
+  $httpProvider.defaults.headers.put = {};
+  $httpProvider.defaults.headers.patch = {};
+
+
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/login');
 })
 
-.factory("TravelFactory",["$http",function($http){
+.factory("TravelFactory",["$http","$rootScope",function($http,$rootScope){
     var TravelAPI = {
       getResult : function(location,destination,date){
-        return $http.get(mbase+"/search.php?location="+location+"&&destination="+destination+"&&date="+date);
+        var link = base+"/search.php";
+        return $http.get(link+"?location="+location+"&&destination="+destination+"&&date="+date+"&&mobileToken="+$rootScope.mobileToken);
       },
 
       getDetails : function(travelId){
-        return $http.get(mbase+"/details.php?travelId="+travelId);
+        var link = base+"/details.php";
+        return $http.get(link+"?travelId="+travelId+"&&mobileToken="+$rootScope.mobileToken);
       },
 
       getTransactions : function(){
-        return  $http.get(mbase+"/get_transactions.php");
+        var link = base+"/get_transactions.php";
+        return  $http.post(link);
       },
 
-      loginUser : function(phoneNo,password){
-        var lbase = "http://trav.dev:90/login_api/";
-        var mlbase = "http://travo.azurewebsites.net/login_api/";
-        return $http.get(mlbase+phoneNo+"/"+password);
+      loginUser : function(phoneNumber,password){
+        var lbase = "http://trav.dev/login_api";
+        //var lbase = "https://trav.com.ng/home/login_api";
+        return $http.get(lbase+"/"+phoneNumber+"/"+password);
       },
 
-      registerUser :function(fullname,email,phoneNo,password){
-        var rbase = "http://trav.dev:90/register_api/";
-        var mrbase = "http://travo.azurewebsites.net/register_api/";
-        return $http.get(mrbase+fullname+"/"+email+"/"+phoneNo+"/"+password);
+      registerUser :function(fullname,email,phoneNo,password,cpassword){
+        var rbase = "http://trav.dev/register_api"
+        //var rbase = "https://trav.com.ng/home/register_api";
+        return $http.get(rbase+"?fullname="+fullname+"&&email="+email+"&&phoneNo="+phoneNo+"&&password="+password+"&&cpassword="+cpassword);
       },
 
       getTickets : function(userId){
-        return $http.get(mbase+"/get_tickets.php?userId="+userId);
+        var link = base+"/get_tickets.php";
+        var userId = userId;
+        return $http.get(link+"?userId="+userId+"&&mobileToken="+$rootScope.mobileToken);
+      },
+
+      getTicket:function(token){
+        var link = base+"/get_ticket.php";
+        var token =token;
+        return $http.get(link+"?token="+token+"&&mobileToken="+$rootScope.mobileToken);
       },
 
       getSuggestedResult : function(location,destination,date){
-        return $http.get(mbase+"/suggestion.php?location="+location+"&&destination="+destination+"&&date="+date);
+         var link = base+"/suggestion.php";
+         return $http.get(link+"?location="+location+"&&destination="+destination+"&&date="+date+"&&mobileToken="+$rootScope.mobileToken);
       },
 
+      pay:function(location,destination,agency,email_address,phone_number,price,fullname,token,travelplan_id,user_id){
+        var link = base+"/pay.php";
+        var userId = $rootScope.userId;
+        return $http.post(link,{location:location,destination:destination,agency:agency,email_address:email_address,
+                                phone_number:phone_number,price:price,fullname:fullname,token:token,
+                                travelplan_id:travelplan_id,user_id:userId
+        });
+
+      },
+
+      getPlaces:function(){
+        var link =  base+"/all_places.php";
+        return $http.get(link+"?mobileToken="+$rootScope.mobileToken);
+      },
+
+      updateProfile:function(fullname,email,phone,kin_name,kin_phone,userId){
+          var link = base+"/update_profile.php";
+          return $http.get(link+"?fullname="+fullname+"&&email="+email+"&&phone="+phone+"&&kin_name="+kin_name+"&&kin_phone="+kin_phone+"&&userId="+userId+"&&mobileToken="+$rootScope.mobileToken);
+          
+      },
+
+      paystack:function(token,travelplan_id,user_id,email_address){
+        var link = base+"/paystack.php";
+        return $http.get(link+"?token="+token+"&&travelplan_id="+travelplan_id+"&&user_id="+user_id+"&&email="+email_address+"&&mobileToken="+$rootScope.mobileToken);
+      }
 
 
     }

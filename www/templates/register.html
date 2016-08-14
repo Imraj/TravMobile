@@ -1,10 +1,11 @@
-<ion-view id="bg-a" title="Register">
+<ion-view id="bg-a" title="Register"  hide-nav-bar="true">
 
-  <ion-nav-buttons side="secondary">
-        <button class="button button-icon ion-person-add" ng-click="Register(loginData.fullName,loginData.emailAddress,loginData.phoneNumber,loginData.password)"></button>
+  <ion-nav-buttons side="secondary" >
+       
   </ion-nav-buttons>
 
   <ion-content class="has-subheader padding">
+ 
     <form >
       <div class="list list-inset">
         <label class="item item-input">
@@ -19,15 +20,24 @@
         <label class="item item-input">
           <input type="password" ng-model="loginData.password" placeholder="Password">
         </label>
-
+        <label class="item item-input">
+          <input type="password" ng-model="loginData.cpassword" placeholder="Confirm Password">
+        </label>
+        <br/>
       </div>
-    </form>
-    <!--<ion-list>
-      <ion-item class="title">
-          <a href="#/app/login" class="button button-small button-balanced">Login To Your Account</a>
-      </ion-item>
-    </ion-list>-->
 
+      <button class="button button-positive button-full" ng-click="Register(loginData.fullName,loginData.emailAddress,loginData.phoneNumber,loginData.password,loginData.cpassword)">Register</button>
+
+    </form>
+    
+
+    <div class="row">
+        <div class="col col-*"></div>
+        <div class="col col-50">
+          <span ng-click="openLoginView()" style="text-align:center" class="text-center">Existing User ? Sign in</span>  
+        </div>
+        <div class="col col-*"></div>
+    </div>
 
   </ion-content>
 </ion-view>

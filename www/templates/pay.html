@@ -5,17 +5,17 @@
           <h2>User Details</h2>
         </ion-item>
         <ion-item>
-          <h3>
+          <h3 id="fullName">
             {{fullName}}
           </h3>
         </ion-item>
         <ion-item>
-          <h3>
+          <h3 id="emailAddress">
             {{emailAddress}}
           </h3>
         </ion-item>
         <ion-item>
-          <h3>
+          <h3 id="phoneNumber">
             {{phoneNumber}}
           </h3>
         </ion-item>
@@ -27,7 +27,7 @@
             <h2>Select A Payment Mode</h2>
           </label>
           <ion-item>
-              <button class="button button-assertive button-small" id="btn-checkout" ng-click="pay($event)">Pay Now</button>
+              <button class="button button-assertive button-small" ng-click="openPaymentForm()">Pay Now</button>
           </ion-item>
         </ion-list>
 
@@ -36,22 +36,32 @@
             <h2>Travel Details</h2>
           </ion-item>
           <ion-item>
-            <h3>{{result.agency}}</h3>
+            <h3 id="agency">{{result.agency}}</h3> 
+            <span id="travelplan_id">{{result.travelplan_id}}</span>
           </ion-item>
           <ion-item>
-            <h3>{{result.pickup_location}}</h3>
+            <h3>
+              <span id="location">{{result.location}}</span> 
+              To 
+              <span id="destination">{{result.destination}}</span>
+            </h3>
+          </ion-item>
+          <ion-item>
+            <h3 >{{result.pickup_location}}</h3>
           </ion-item>
           <ion-item>
             <h3>{{result.dropoff_location}}</h3>
           </ion-item>
           <ion-item>
-            <h3>N{{result.price}}</h3>
+            <h3>N<span id="price">{{result.price}}</span></h3>
+          </ion-item>
+           <ion-item>
+            <h3>{{result.pickup_time}}</h3>
+          </ion-item>
+          <ion-item>
+            <h3>{{result.pickup_date}}</h3>
           </ion-item>
         </ion-list>
-
-      <form id="checkout_form" method="post" action="mmc.orgfree.com/verify.php">
-
-      </form>
 
   </ion-content>
 </ion-view>

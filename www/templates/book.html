@@ -1,9 +1,6 @@
 
 
 <ion-view title="Book">
-  <ion-nav-buttons side="Secondary">
-      <button class="button button-icon ion-search" ng-click="travelSearch(travel.location,travel.destination)"></button>
-  </ion-nav-buttons>
 
   <ion-content class="padding" id="bg-a">
 
@@ -18,22 +15,19 @@
         </ion-item>
         <ion-item class="item-icon-left">
             <i class="icon ion-calendar"></i>
-            <h2>{{result.pickup_datetime}}</h2>
+              <h2>{{result.pickup_date}}</h2>
+            <h2>{{result.pickup_time}}</h2>
         </ion-item>
         <ion-item class="item-icon-left item-text-wrap">
               <i class="icon ion-location"></i>
               Drop Off Address : {{ result.dropoff_location}}
-
         </ion-item>
         <ion-item class="item-icon-left item-text-wrap">
               <i class="icon ion-location"></i>
               Pick Up Address : {{ result.pickup_location}}
-
         </ion-item>
         <ion-item>
-              <a class="button button-block button-dark" href="#/app/pay/{{result.id}}">Proceed</a>
-              <!--<button class="button button-block button-dark" ng-click="openBrowser()"">Proceed</button>-->
-
+            <a class="button button-block button-dark" href="#/app/pay/{{result.id}}">Proceed</a>
         </ion-item>
       </ion-list>
   </ion-content>

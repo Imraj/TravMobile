@@ -1,16 +1,10 @@
 
-<ion-header-bar class="bar bar-dark">
-    <button class="button button-icon ion-navicon" menu-toggle="left"></button>
-    <h1 class="title">Login To Your Account</h1>
-    <button class="button button-icon ion-log-in" ng-click="Login(loginData.phoneNo,loginData.password)"></button>
-</ion-header-bar>
 
-<ion-view id="bg-a" title="Login">
-  <ion-nav-buttons side="secondary">
-      <button class="button button-icon ion-log-in" ng-click="Login(loginData.phoneNo,loginData.password)"></button>
-  </ion-nav-buttons>
+<ion-view id="bg-a" title="Login To Your Account" hide-nav-bar="true">
+
 
   <ion-content class="padding has-subheader">
+    
     <form>
       <div class="list">
 
@@ -21,11 +15,28 @@
         <label class="item item-input">
           <input type="password" ng-model="loginData.password" placeholder="Password">
         </label>
+        <div class="row">
+          <div class="col col-*"></div>
+          <div class="col col-40">
+            <span ng-click="showForgotPassword()" style="text-align:center;" class="text-center">Forgot Password?</span>
+          </div>
+          <div class="col col-*"></div>
+        </div>
+         
+      </div>
+
+        <button class="button button-positive button-full " ng-click="Login(loginData.phoneNo,loginData.password)">Sign In</button>
 
       </div>
     </form>
-    <br/><br/>
 
+    <div class="row">
+         <div class="col col-*"></div>
+         <div class="col col-75">
+            <span ng-click="openRegisterView()" >Don't Have an account ? Sign up</span>
+         </div>
+         <div class="col col-*"></div>
+    </div>
 
   </ion-content>
 </ion-view>
